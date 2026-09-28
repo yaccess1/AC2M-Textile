@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="ac2m Textile : collection de vêtements en coton bio et fibres recyclées, personnalisables avec votre logo.">
+<link rel="icon" href="assets/logo-ecusson.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ac2m textile, la collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..600,50&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+  <linearGradient id="gBody" x1="0" x2="1" y1="0" y2="0">
+    <stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".18" stop-color="#000" stop-opacity="0"/>
+    <stop offset=".5" stop-color="#fff" stop-opacity=".07"/><stop offset=".82" stop-color="#000" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".24"/>
+  </linearGradient>
+  <linearGradient id="gVert" x1="0" x2="0" y1="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".06"/><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/>
+  </linearGradient>
+  <linearGradient id="gSleeve" x1="0" x2="1" y1="0" y2="0">
+    <stop offset="0" stop-color="#000" stop-opacity=".26"/><stop offset=".55" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".16"/>
+  </linearGradient>
+  <radialGradient id="gHoodIn" cx=".5" cy=".3" r=".7"><stop offset="0" stop-color="#000" stop-opacity=".45"/><stop offset="1" stop-color="#000" stop-opacity=".15"/></radialGradient>
+  <pattern id="pRib" width="5" height="10" patternUnits="userSpaceOnUse"><rect width="5" height="10" fill="none"/><line x1="2.5" y1="0" x2="2.5" y2="10" stroke="#000" stroke-opacity=".16" stroke-width="1.6"/></pattern>
+  <pattern id="pWale" width="3.2" height="6" patternUnits="userSpaceOnUse"><path d="M0 0 L1.6 3 L3.2 0" fill="none" stroke="#000" stroke-opacity=".035" stroke-width=".5"/></pattern>
+  <filter id="fNoise" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.4 0 0 0 1.05"/>
+  </filter>
+  <filter id="fFleck" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="3"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3 0 0 0 -1.9"/>
+  </filter>
+  <filter id="fFold" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7"/></filter>
+  <filter id="fDrop" x="-20%" y="-10%" width="140%" height="130%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="14"/><feOffset dy="18" result="b"/>
+    <feFlood flood-color="#1b1d12" flood-opacity=".22"/><feComposite in2="b" operator="in"/>
+    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <!-- marquages -->
+  <filter id="fInk" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="1" seed="11" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G" result="d"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.2 0 0 0 2.05" result="holes"/>
+    <feComposite in="d" in2="holes" operator="in"/>
+  </filter>
+  <filter id="fSheen" x="-10%" y="-10%" width="120%" height="125%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="b"/>
+    <feSpecularLighting in="b" surfaceScale="1.4" specularConstant=".32" specularExponent="22" lighting-color="#fff" result="s"><feDistantLight azimuth="235" elevation="52"/></feSpecularLighting>
+    <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
+    <feOffset in="SourceAlpha" dy=".7" result="o"/><feGaussianBlur in="o" stdDeviation=".7" result="ob"/>
+    <feFlood flood-color="#000" flood-opacity=".28"/><feComposite in2="ob" operator="in" result="sh"/>
+    <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/><feMergeNode in="s2"/></feMerge>
+  </filter>
+  <filter id="fSatin" x="-10%" y="-10%" width="120%" height="125%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="1.3" result="b"/>
+    <feSpecularLighting in="b" surfaceScale="2.2" specularConstant=".62" specularExponent="11" lighting-color="#fff" result="s"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>
+    <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
+    <feOffset in="SourceAlpha" dy=".8" result="o"/><feGaussianBlur in="o" stdDeviation=".8" result="ob"/>
+    <feFlood flood-color="#000" flood-opacity=".3"/><feComposite in2="ob" operator="in" result="sh"/>
+    <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/><feMergeNode in="s2"/></feMerge>
+  </filter>
+  <filter id="fRaised" x="-15%" y="-15%" width="130%" height="140%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="1.8" result="b"/>
+    <feSpecularLighting in="b" surfaceScale="4.5" specularConstant=".55" specularExponent="16" lighting-color="#fff" result="s"><feDistantLight azimuth="225" elevation="42"/></feSpecularLighting>
+    <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
+    <feDiffuseLighting in="b" surfaceScale="4" diffuseConstant="1" lighting-color="#fff" result="dl"><feDistantLight azimuth="225" elevation="55"/></feDiffuseLighting>
+    <feComposite in="SourceGraphic" in2="dl" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="lit"/>
+    <feOffset in="SourceAlpha" dx=".6" dy="2" result="o"/><feGaussianBlur in="o" stdDeviation="1.5" result="ob"/>
+    <feFlood flood-color="#000" flood-opacity=".38"/><feComposite in2="ob" operator="in" result="sh"/>
+    <feMerge><feMergeNode in="sh"/><feMergeNode in="lit"/><feMergeNode in="s2"/></feMerge>
+  </filter>
+  <filter id="fEmb" x="-15%" y="-15%" width="130%" height="140%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="1.3" result="b"/>
+    <feSpecularLighting in="b" surfaceScale="3" specularConstant=".4" specularExponent="9" lighting-color="#fff" result="s"><feDistantLight azimuth="225" elevation="45"/></feSpecularLighting>
+    <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
+    <feOffset in="SourceAlpha" dx=".4" dy="1.3" result="o"/><feGaussianBlur in="o" stdDeviation="1" result="ob"/>
+    <feFlood flood-color="#000" flood-opacity=".36"/><feComposite in2="ob" operator="in" result="sh"/>
+    <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/><feMergeNode in="s2"/></feMerge>
+  </filter>
+  <filter id="fEmb3d" x="-15%" y="-15%" width="130%" height="145%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2.6" result="b"/>
+    <feSpecularLighting in="b" surfaceScale="7" specularConstant=".55" specularExponent="10" lighting-color="#fff" result="s"><feDistantLight azimuth="225" elevation="38"/></feSpecularLighting>
+    <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
+    <feDiffuseLighting in="b" surfaceScale="6" diffuseConstant="1" lighting-color="#fff" result="dl"><feDistantLight azimuth="225" elevation="50"/></feDiffuseLighting>
+    <feComposite in="SourceGraphic" in2="dl" operator="arithmetic" k1="1" result="lit"/>
+    <feOffset in="SourceAlpha" dx="1" dy="3" result="o"/><feGaussianBlur in="o" stdDeviation="2" result="ob"/>
+    <feFlood flood-color="#000" flood-opacity=".42"/><feComposite in2="ob" operator="in" result="sh"/>
+    <feMerge><feMergeNode in="sh"/><feMergeNode in="lit"/><feMergeNode in="s2"/></feMerge>
+  </filter>
+  <filter id="fOutline" x="-15%" y="-15%" width="130%" height="140%">
+    <feMorphology in="SourceGraphic" operator="dilate" radius="1.4" result="dil"/>
+    <feMorphology in="SourceAlpha" operator="erode" radius="1.2" result="ero"/>
+    <feComposite in="dil" in2="ero" operator="out" result="ring"/>
+    <feGaussianBlur in="ring" stdDeviation=".7" result="b"/>
+    <feSpecularLighting in="b" surfaceScale="2" specularConstant=".5" specularExponent="10" lighting-color="#fff" result="s"><feDistantLight azimuth="225" elevation="45"/></feSpecularLighting>
+    <feComposite in="s" in2="ring" operator="in" result="s2"/>
+    <feOffset in="ring" dy="1" result="o"/><feColorMatrix in="o" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .4 0" result="sh"/>
+    <feMerge><feMergeNode in="sh"/><feMergeNode in="ring"/><feMergeNode in="s2"/></feMerge>
+  </filter>
+  <pattern id="pStitch" width="1.7" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
+    <line x1=".4" y1="0" x2=".4" y2="6" stroke="#fff" stroke-opacity=".3" stroke-width=".55"/>
+    <line x1="1.25" y1="0" x2="1.25" y2="6" stroke="#000" stroke-opacity=".2" stroke-width=".5"/>
+    <line x1="0" y1="3" x2="1.7" y2="3.2" stroke="#000" stroke-opacity=".08" stroke-width=".3"/>
+  </pattern>
+  <pattern id="pStitchB" width="1.9" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-40)">
+    <line x1=".45" y1="0" x2=".45" y2="6" stroke="#fff" stroke-opacity=".28" stroke-width=".6"/>
+    <line x1="1.4" y1="0" x2="1.4" y2="6" stroke="#000" stroke-opacity=".2" stroke-width=".55"/>
+  </pattern>
+  <radialGradient id="gSeq" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".35" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></radialGradient>
+  <pattern id="pSequin" width="5.2" height="4.6" patternUnits="userSpaceOnUse"><circle cx="2.6" cy="2.3" r="2.3" fill="url(#gSeq)" stroke="#000" stroke-opacity=".18" stroke-width=".3"/></pattern>
+  <pattern id="pDots" width="5.4" height="5.4" patternUnits="userSpaceOnUse"><circle cx="2.7" cy="2.7" r="2.05" fill="#fff"/></pattern>
+  <radialGradient id="gStrass" cx=".38" cy=".32" r=".7"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset=".3" stop-color="#fff" stop-opacity=".45"/><stop offset=".75" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient>
+  <pattern id="pStrassShine" width="5.4" height="5.4" patternUnits="userSpaceOnUse"><circle cx="2.7" cy="2.7" r="2.05" fill="url(#gStrass)"/></pattern>
+  <linearGradient id="gGloss" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".45" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="ac2m textile, accueil"><img src="assets/logo-ecusson.jpg" alt="Monogramme brodé ac2m" id="brandLogo"><span>ac2m Textile</span></a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="#collection">Collection</a>
+      <a href="#matieres">Matières</a>
+      <button class="btn small solid" id="navConfig" type="button">Personnaliser un sweat</button>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <svg class="thread" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true"><path id="threadPath" d="M-20 170 C 240 170 330 40 560 70 C 760 96 700 200 900 180 C 1040 166 1080 90 1200 80"/></svg>
+    <div class="wrap">
+      <div>
+        <h1 class="display">Votre marque, <em>tissée</em> pour durer.</h1>
+        <p class="lead">Seize pièces en coton bio et fibres recyclées, dont huit fabriquées au Portugal. Choisissez un modèle, placez votre logo et voyez aussitôt le rendu du marquage.</p>
+        <div class="ctas">
+          <a class="btn solid" href="#collection">Voir la collection</a>
+          <button class="btn" type="button" id="heroConfig">Essayer la personnalisation</button>
+        </div>
+      </div>
+      <div class="loupe-card" id="loupe" aria-label="Gros plan interactif sur la maille">
+        <div class="loupe-hint" id="loupeHint">Passez sur le tissu pour voir la maille</div>
+        <svg id="loupeSvg" viewBox="0 0 600 612" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+        <div class="loupe-ring" id="loupeRing"></div>
+        <div class="loupe-tag" id="loupeTag"></div>
+        <div class="fabric-tabs" role="group" aria-label="Choisir une maille">
+          <button type="button" data-fab="jersey" aria-pressed="true">Jersey<small>140 à 180 g/m²</small></button>
+          <button type="button" data-fab="fleece" aria-pressed="false">Molleton gratté<small>300 à 340 g/m²</small></button>
+          <button type="button" data-fab="terry" aria-pressed="false">Bouclette<small>300 g/m²</small></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="collection">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">La collection</h2>
+        <div class="chips" id="filters" role="group" aria-label="Filtrer par famille"></div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="band" id="matieres">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 class="display">Du plus léger au plus dense</h2>
+        <p>Le grammage indique le poids du tissu au mètre carré. Plus il est élevé, plus la pièce est épaisse, chaude et tient dans le temps. Touchez un modèle pour l’ouvrir.</p>
+      </div>
+      <div class="gauge"><div class="gauge-inner" id="gauge"></div></div>
+      <div class="facts">
+        <div><h3>Coton bio</h3><p>Toutes les pièces contiennent du coton issu de l’agriculture biologique, jusqu’à 100 % pour les t-shirts, le polo et le sweat Capri.</p></div>
+        <div><h3>Fibres recyclées</h3><p>Les molletons associent coton recyclé et polyester recyclé, jusqu’à 60 % de fibres recyclées sur les molletons fabriqués au Portugal.</p></div>
+        <div><h3>Sans étiquette</h3><p>Aucune étiquette de marque à l’encolure : la place est libre pour la vôtre, sans rien à découdre.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <img src="assets/logo-ecusson.jpg" alt="Monogramme brodé ac2m">
+      <p>Une marque ac2m, objets et textiles publicitaires durables</p>
+      <p>140, rue Edouard Michelin, 54710 Fléville-devant-Nancy</p>
+    </div>
+    <p><a href="https://ac2m-communication.fr" target="_blank" rel="noopener">ac2m-communication.fr</a><br>Tarifs sur devis selon quantités et marquages.</p>
+  </div>
+</footer>
+
+<div class="pv" id="pv" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="pvTitle">
+  <div class="pv-bar">
+    <button class="back" type="button" id="pvBack"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M11 3 L5 9 L11 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Collection</button>
+    <div class="crumb" id="pvCrumb"></div>
+    <a class="btn small" href="#recap" id="pvRecapBtn">Récapitulatif</a>
+  </div>
+  <div class="pv-body" id="pvBody">
+    <div class="stage" id="stage">
+      <svg class="main" id="stageSvg" viewBox="0 0 600 720" aria-label="Aperçu du produit personnalisé" role="img"></svg>
+      <div class="stage-ui">
+        <div class="seg" role="group" aria-label="Vue"><button type="button" data-view="front" aria-pressed="true">Face</button><button type="button" data-view="back" aria-pressed="false">Dos</button></div>
+        <button class="icon-btn" type="button" id="zoomOut">Vue d’ensemble</button>
+      </div>
+      <div class="zone-chip"><div class="lbl" id="zoneLbl"></div><div class="hint" id="zoneHint">Faites glisser le visuel dans la zone quadrillée</div></div>
+    </div>
+    <div class="panel" id="panel"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="sr" tabindex="-1" aria-hidden="true">
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
