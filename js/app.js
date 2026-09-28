@@ -1,7 +1,7 @@
 (function(){
 "use strict";
 const DATA = window.AC2M_DATA;
-const LOGO = "assets/logo-monogramme.png";
+const LOGO = window.AC2M_LOGO || "assets/logo-monogramme.png";
 const CALAGE = new URLSearchParams(location.search).has("calage");
 const S = 0.6; // px par mm (poitrine ~55 cm = 330 px)
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -96,8 +96,30 @@ function garment(p, view, color, opt={}){
   return {back, front, shading, det, clip};
 }
 function photoOf(p,ci){const code=p.colors[ci][0];return p.photos&&(p.photos[code]||p.photos.default)}
-function cardVisual(p,ci){const ph=photoOf(p,ci);return ph?`<img class="photo" src="${esc(ph)}" alt="${esc(p.model+', '+p.colors[ci][1])}" loading="lazy">`:garmentSVG(p,p.colors[ci][2])}
-function mockupOf(p,ci,view){const code=p.colors[ci][0];const m=p.mockups&&(p.mockups[code]||p.mockups.default);return m&&m[view]}
+function cardVisual(p,ci){
+  const alt=esc(p.model+', '+p.colors[ci][1]);
+  const ph=photoOf(p,ci); if(ph) return `<img class="photo" src="${esc(ph)}" alt="${alt}" loading="lazy">`;
+  const mk=autoMock(p,ci,'front'); if(mk) return `<img class="photo mock" src="${esc(mk)}" alt="${alt}" loading="lazy">`;
+  return garmentSVG(p,p.colors[ci][2]);
+}
+// Photos de maquette : champ "mockups" dans data.js, ou détection automatique
+// des fichiers préparés avec outils/preparer-photo.html :
+// assets/maquettes/<réf>-<code couleur>-face.webp (ou -dos, ou .png)
+const MOCKS={};
+function autoMock(p,ci,view){
+  const base=`assets/maquettes/${p.sku.toLowerCase()}-${p.colors[ci][0]}-${view==='back'?'dos':'face'}`;
+  if(base in MOCKS) return MOCKS[base];
+  MOCKS[base]=null;
+  const tryExt=list=>{if(!list.length)return;const url=base+'.'+list[0];const im=new Image();
+    im.onload=()=>{MOCKS[base]=url;
+      if(state.p===p&&$('#pv').classList.contains('open'))renderStage();
+      // la carte de la collection affiche aussi la photo si elle montre ce coloris
+      if(view!=='back'){const shot=document.querySelector(`[data-shot="${p.sku}"]`);if(shot&&+shot.dataset.ci===ci)swapCard(shot,p,ci)}};
+    im.onerror=()=>tryExt(list.slice(1));im.src=url};
+  tryExt(['webp','png','jpg']);
+  return null;
+}
+function mockupOf(p,ci,view){const code=p.colors[ci][0];const m=p.mockups&&(p.mockups[code]||p.mockups.default);return (m&&m[view])||autoMock(p,ci,view)}
 function garmentSVG(p,color,view='front'){
   const g=garment(p,view,color);
   return `<svg viewBox="40 20 520 650" aria-hidden="true"><g>${g.back}${g.front}${g.shading}${g.det}</g></svg>`;
@@ -128,6 +150,7 @@ function zoneGeom(p,pl,tech){
   const top = ov.top!==undefined?ov.top:{pg:214,pd:214,face:hoodie?214:206,dos:hoodie?190:178}[pl];
   const cx= ov.cx!==undefined?ov.cx:{pg:374,pd:226,face:300,dos:300}[pl];
   let cy=top+h*S/2;
+  if(ov.top!==undefined) return {cx,cy,rot:0,wmm:w,hmm:h,limited:false,view:pl==='dos'?'back':'front'};
   if(pl==='pg'||pl==='pd') cy=Math.max(cy,top+36);
   // face des capuches : rester au-dessus de la poche
   if(pl==='face'&&hoodie){const bottom=432;if(cy+h*S/2>bottom)cy=Math.max(top+h*S/2-(cy+h*S/2-bottom),bottom-h*S/2)}
@@ -139,7 +162,7 @@ let artSeq=0;
 function loadArt(src,name,forceRemove){
   return new Promise((res,rej)=>{
     const im=new Image();
-    im.onload=()=>{
+    im.onload=()=>{ try{
       const max=900; let w=im.naturalWidth||600, h=im.naturalHeight||600;
       const k=Math.min(1,max/Math.max(w,h)); w=Math.round(w*k); h=Math.round(h*k);
       const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
@@ -149,7 +172,7 @@ function loadArt(src,name,forceRemove){
       const hasAlpha=alphaPx>d.data.length/4*0.01;
       const art={id:++artSeq,name,w,h,orig:d,hasAlpha,removeWhite:forceRemove!==undefined?forceRemove:!hasAlpha,cache:{}};
       buildArt(art); res(art);
-    };
+    }catch(err){rej(err)} };
     im.onerror=()=>rej(new Error('image'));
     im.src=src;
   });
@@ -243,8 +266,27 @@ const PL_ORDER=['pd','face','pg','md','dos','mg'];
 /* ---------- état ---------- */
 const state={p:null,color:0,view:'front',pl:'face',showAll:false,marks:{},art:null,hoverTech:null,qty:{}};
 let defaultArt=null;
-const artReady=loadArt(LOGO,'Monogramme ac2m',false).then(a=>{defaultArt=a;return a});
+function textArt(){ // visuel de secours si le logo ne peut pas être lu
+  const cv=document.createElement('canvas');cv.width=600;cv.height=220;const c=cv.getContext('2d');
+  c.fillStyle='#68704B';c.font='800 120px Montserrat, Arial, sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('ac2m',300,115);
+  return loadArt(cv.toDataURL('image/png'),'Votre logo',false);
+}
+const artReady=loadArt(LOGO,'Monogramme ac2m',false).catch(err=>{console.warn('Logo par défaut illisible, visuel de secours utilisé.',err);return textArt()}).then(a=>{defaultArt=a;return a});
 
+/* ---------- engagement matières ---------- */
+const LEAF='<svg class="leaf" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5C4.5 10.6 10.4 4.8 20 4c-.3 9.8-6.3 15.5-15.5 15.5z" fill="currentColor"/><path class="v" d="M4.5 19.5 14 10" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
+function ecoInfo(p){let bio=0,rec=0;p.comp.split(',').forEach(s=>{const n=parseFloat(s)||0;if(/bio/i.test(s))bio+=n;else if(/recycl/i.test(s))rec+=n});return{bio,rec}}
+function ecoLabel(p){const e=ecoInfo(p);return e.rec?'Bio et recyclé':(e.bio===100?'100 % coton bio':'Coton bio')}
+function ecoBlock(p){
+  const e=ecoInfo(p);
+  const txt=e.rec
+    ?`Cette pièce associe du coton issu de l’agriculture biologique, cultivé sans pesticides ni engrais de synthèse, et des fibres recyclées, qui valorisent une matière existante plutôt que d’en produire une nouvelle.`
+    :`Cette pièce est taillée dans un coton issu de l’agriculture biologique, cultivé sans pesticides ni engrais de synthèse.`;
+  const tags=[`${e.bio} % coton biologique`];
+  if(e.rec)tags.push(`${e.rec} % fibres recyclées`);
+  if(p.pt)tags.push('Fabriqué au Portugal');
+  return `<div class="eco"><div class="ic">${LEAF}</div><div><b>Des matières choisies pour durer</b><p>${txt}</p><div class="tags">${tags.map(t=>`<span>${t}</span>`).join('')}</div></div></div>`;
+}
 /* ---------- catalogue ---------- */
 const TYPES=[['all','Tout'],['hoodie','Capuches'],['crew','Cols ronds'],['zip','Col zippé'],['tee','T-shirts'],['polo','Polo']];
 const PREF=['Beige','Vert foncé','Marron clair','Bleu marine','Gris chiné','Taupe','Bleu pétrole','Vert armée','Blanc cassé','Terracotta','Gris clair','Bordeaux'];
@@ -258,7 +300,7 @@ function renderGrid(cur='all'){
   $('#grid').innerHTML=list.map((p,pi)=>{const ci=cardColor(p,DATA.products.indexOf(p));return `
     <article>
       <button class="card" type="button" data-sku="${p.sku}" aria-label="${esc(p.model+', '+p.sub)}">
-        <div class="shot" data-shot="${p.sku}" data-ci="${ci}">${cardVisual(p,ci)}${p.pt?'<span class="pt">Fabriqué au Portugal</span>':''}<span class="gsm">${p.gsm} g/m²</span></div>
+        <div class="shot" data-shot="${p.sku}" data-ci="${ci}">${cardVisual(p,ci)}${p.pt?'<span class="pt">Fabriqué au Portugal</span>':''}<span class="gsm">${p.gsm} g/m²</span><span class="eco-pill">${LEAF}${ecoLabel(p)}</span></div>
         <h3>${esc(p.model)}</h3>
         <p class="sub">${esc(p.sub)}</p>
       </button>
@@ -404,7 +446,8 @@ function markSVG(m,idx){
   const drag=`data-mark="${m.pl}" style="cursor:grab"`;
   const hit=`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="transparent"/>`;
   if(['print','dtg','hf'].includes(f)){
-    below=`<g ${T} ${drag}><g filter="url(#fInk)" opacity="${f==='dtg'?.9:.95}">${img}</g>${hit}</g>`;
+    const blend=lum(garmentColor())>.45?' style="mix-blend-mode:multiply"':'';
+    below=`<g ${T} ${drag}><g filter="url(#fInk)" opacity="${f==='dtg'?.9:.95}"${blend}>${img}</g>${hit}</g>`;
   } else {
     let inner='';
     if(f==='transfer') inner=`<g filter="url(#fSheen)">${img}</g>`;
@@ -462,7 +505,7 @@ function renderStage(instant){
   const svg=$('#stageSvg');
   const mk=mockupOf(p,state.color,view);
   if(mk){
-    svg.innerHTML=`<g class="flip" id="flip"><image href="${esc(mk)}" x="0" y="0" width="600" height="720" preserveAspectRatio="xMidYMid meet"/>${below}${above}${zone}</g>`;
+    svg.innerHTML=`<g class="flip" id="flip"><g filter="url(#fDrop)"><image href="${esc(mk)}" x="0" y="0" width="600" height="720" preserveAspectRatio="xMidYMid meet"/></g>${below}${above}${zone}${CALAGE?calageMarks():''}</g>`;
   } else
   svg.innerHTML=`<defs><clipPath id="gclip">${g.clip}</clipPath></defs>
   <g class="flip" id="flip">
@@ -477,6 +520,7 @@ function renderStage(instant){
     <g pointer-events="none">${g.det}</g>
     ${above}
     ${zone}
+    ${CALAGE?calageMarks():''}
   </g>`;
   const pz=state.marks[state.pl];
   const lbl = pz ? `<b>${DATA.placements[state.pl].name}, ${pz.tech[0].toLowerCase()}${pz.tech[2]?' '+fmtTxt(pz.tech[2]):''}</b>Zone ${z.wmm} × ${z.hmm} mm${z.limited?' (réduite à la manche courte)':''}` : `<b>${DATA.placements[state.pl].name}</b>Choisissez une technique pour ajouter ce marquage`;
@@ -520,6 +564,21 @@ function selectPlacement(pl){
   renderPanel();
 }
 
+/* ---------- calage (?calage) ---------- */
+let calStep='a';
+function calageMarks(){
+  const p=state.p; if(!(state.pl==='md'||state.pl==='mg'))return '';
+  const ax=sleeveAxis(p,state.pl);
+  return `<g pointer-events="none"><line x1="${ax.a[0]}" y1="${ax.a[1]}" x2="${ax.b[0]}" y2="${ax.b[1]}" stroke="#E0543F" stroke-width="1.4" stroke-dasharray="4 3"/><circle cx="${ax.a[0]}" cy="${ax.a[1]}" r="5" fill="#E0543F"/><circle cx="${ax.b[0]}" cy="${ax.b[1]}" r="5" fill="#fff" stroke="#E0543F" stroke-width="2"/></g>`;
+}
+function calageConfig(){
+  const p=state.p, out={};
+  if(p.mockups){out.mockups={};for(const code in p.mockups){out.mockups[code]={};for(const v in p.mockups[code]){const src=p.mockups[code][v];out.mockups[code][v]=src.startsWith('data:')?`assets/maquettes/${(p._files&&p._files[code+v])||(p.sku.toLowerCase()+'-'+code+'-'+v+'.png')}`:src}}}
+  if(p.photos) out.photos=p.photos;
+  if(p.zones) out.zones=p.zones;
+  const txt=JSON.stringify(out,null,2).replace(/^\{\n|\n\}$/g,'');
+  return `// À coller dans js/data.js, dans le produit ${p.sku} (juste après la ligne "sku": "${p.sku}",)\n${txt},`;
+}
 /* ---------- panneau ---------- */
 function placeIcon(pl){
   const back=pl==='dos';
@@ -554,11 +613,19 @@ function renderPanel(){
   const marks=Object.values(state.marks).sort((a,b)=>PL_ORDER.indexOf(a.pl)-PL_ORDER.indexOf(b.pl));
   const sizes=sizesOf(p);
   const total=sizes.reduce((s,z)=>s+(+state.qty[z]||0),0);
-  $('#panel').innerHTML=`
+  const cal=CALAGE?`<div class="block calage" style="border-top:0;padding-top:0;margin-bottom:8px"><div class="recap" style="background:var(--kaki);color:#fff">
+      <h2 style="margin-bottom:8px">Outil de calage</h2>
+      <p style="margin:0 0 12px;font-size:13.5px;opacity:.9">1. Importez la photo détourée du coloris affiché. 2. Choisissez un emplacement puis faites glisser la zone quadrillée à sa place. Pour une manche, cliquez sur l’épaule puis sur le poignet. 3. Copiez la configuration et collez-la dans js/data.js.</p>
+      <div class="row" style="margin-top:0">
+        <label class="btn small" style="border-color:#fff;color:#fff">Photo de face<input type="file" accept="image/*" data-mock="front" class="sr"></label>
+        <label class="btn small" style="border-color:#fff;color:#fff">Photo de dos<input type="file" accept="image/*" data-mock="back" class="sr"></label>
+        <button class="btn small" type="button" id="calCopy" style="background:#fff;color:#333;border-color:#fff">Copier la configuration</button>
+      </div></div></div>`:'';
+  $('#panel').innerHTML=cal+`
     <h1 class="display" id="pvTitle">${esc(p.model)}</h1>
     <p class="sub">${esc(p.sub)}, réf. ${p.sku}</p>
     <div class="facts-row"><span class="fact">${p.gsm} g/m²</span><span class="fact">${esc(p.comp)}</span><span class="fact">Tailles ${esc(p.sizes)}</span>${p.pt?'<span class="fact pt">Fabriqué au Portugal</span>':''}</div>
-    <details class="more"><summary>Détails de fabrication</summary><ul>${p.feat.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></details>
+    ${ecoBlock(p)}<details class="more"><summary>Détails de fabrication</summary><ul>${p.feat.map(f=>`<li>${esc(f)}</li>`).join('')}</ul></details>
     <div class="block" style="margin-top:22px"><h2>Coloris<span class="aside">${esc(col[1])}, ${col[0]}</span></h2>
       <div class="swatches" role="group" aria-label="Coloris">${p.colors.map((c,i)=>`<button class="sw" type="button" data-ci="${i}" style="background:${c[2]}" title="${esc(c[1])}" aria-label="${esc(c[1])}" aria-pressed="${i===state.color}"></button>`).join('')}</div>
       <p class="note">Teintes à l’écran indicatives.</p></div>
@@ -650,6 +717,15 @@ function bind(){
   // import de fichier
   const handleFile=f=>{if(!f)return;if(!/^image\//.test(f.type)){toast('Choisissez une image PNG, JPG, WEBP ou SVG');return}
     const r=new FileReader();r.onload=()=>loadArt(r.result,f.name).then(a=>{state.art=a;const m=state.marks[state.pl];if(m){m.art=a;m.ox=0;m.oy=0}renderStage();renderPanel();toast('Visuel importé')}).catch(()=>toast('Ce fichier ne peut pas être lu. Essayez un PNG ou un JPG.'));r.readAsDataURL(f)};
+  panel.addEventListener('change',e=>{
+    const inp=e.target; if(!inp.dataset||!inp.dataset.mock)return; const f=inp.files[0]; if(!f)return;
+    const r=new FileReader(); r.onload=()=>{const p=state.p, code=p.colors[state.color][0], v=inp.dataset.mock;
+      p.mockups=p.mockups||{}; p.mockups[code]=p.mockups[code]||{}; p.mockups[code][v]=r.result;
+      p._files=p._files||{}; p._files[code+v]=f.name.replace(/\s+/g,'-').toLowerCase();
+      if(state.view!==(v==='back'?'back':'front')) switchView(v==='back'?'back':'front',()=>{renderStage();focusCamera(true)}); else {renderStage();focusCamera(true)}
+      toast('Photo chargée pour ce coloris');}; r.readAsDataURL(f);
+  });
+  panel.addEventListener('click',e=>{if(e.target.closest('#calCopy')){const t=calageConfig();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Configuration copiée')).catch(()=>prompt('Copiez la configuration :',t))}});
   $('#file').addEventListener('change',e=>{handleFile(e.target.files[0]);e.target.value=''});
   panel.addEventListener('dragover',e=>{const d=e.target.closest('#drop');if(d){e.preventDefault();d.classList.add('over')}});
   panel.addEventListener('dragleave',e=>{const d=e.target.closest('#drop');if(d)d.classList.remove('over')});
@@ -657,7 +733,21 @@ function bind(){
   // glisser le visuel sur l'aperçu
   const svg=$('#stageSvg'); let drag=null;
   const toSvg=(x,y)=>{const pt=svg.createSVGPoint();pt.x=x;pt.y=y;return pt.matrixTransform(svg.getScreenCTM().inverse())};
+  let zdrag=null;
   svg.addEventListener('pointerdown',e=>{
+    if(CALAGE&&!e.target.closest('[data-mark]')){
+      const s=toSvg(e.clientX,e.clientY), p=state.p; p.zones=p.zones||{};
+      if(state.pl==='md'||state.pl==='mg'){
+        const pt=[Math.round(state.pl==='mg'?600-s.x:s.x),Math.round(s.y)];
+        const cur=sleeveAxis(p,'md'); const z=p.zones.md||{a:cur.a,b:cur.b};
+        z[calStep]=pt; p.zones.md={a:z.a,b:z.b}; calStep=calStep==='a'?'b':'a';
+        renderStage(); toast(calStep==='b'?'Épaule placée, cliquez sur le poignet':'Poignet placé');
+        return;
+      }
+      const tech=(state.marks[state.pl]&&state.marks[state.pl].tech)||defaultTech(state.pl);
+      const z=zoneGeom(p,state.pl,tech);
+      zdrag={sx:s.x,sy:s.y,cx:z.cx,top:z.cy-z.hmm*S/2}; svg.setPointerCapture(e.pointerId); e.preventDefault(); return;
+    }
     const g=e.target.closest('[data-mark]'); if(!g)return;
     const m=state.marks[g.dataset.mark]; if(!m)return;
     if(state.pl!==m.pl){state.pl=m.pl;renderPanel()}
@@ -665,12 +755,13 @@ function bind(){
     drag={m,z,sx:s.x,sy:s.y,ox:m.ox,oy:m.oy}; svg.setPointerCapture(e.pointerId); e.preventDefault();
   });
   svg.addEventListener('pointermove',e=>{
+    if(zdrag){const s=toSvg(e.clientX,e.clientY);state.p.zones[state.pl]={cx:Math.round(zdrag.cx+s.x-zdrag.sx),top:Math.round(zdrag.top+s.y-zdrag.sy)};if(!zdrag.pending){zdrag.pending=true;requestAnimationFrame(()=>{if(zdrag)zdrag.pending=false;renderStage()})}return}
     if(!drag)return; const s=toSvg(e.clientX,e.clientY); let dx=s.x-drag.sx, dy=s.y-drag.sy;
     const r=-drag.z.rot*Math.PI/180; const lx=dx*Math.cos(r)-dy*Math.sin(r), ly=dx*Math.sin(r)+dy*Math.cos(r);
     drag.m.ox=drag.ox+lx; drag.m.oy=drag.oy+ly;
     if(!drag.pending){drag.pending=true;requestAnimationFrame(()=>{if(drag){drag.pending=false;renderStage()}})}
   });
-  const end=()=>{if(drag){drag=null;renderStage();renderPanel()}};
+  const end=()=>{if(zdrag){zdrag=null;renderStage()}if(drag){drag=null;renderStage();renderPanel()}};
   svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
   svg.setAttribute('tabindex','0');
   if(CALAGE){svg.addEventListener('pointermove',e=>{const s=toSvg(e.clientX,e.clientY);$('#zoneHint').textContent=`Calage : x ${Math.round(s.x)}, y ${Math.round(s.y)}`})}
@@ -679,6 +770,5 @@ function bind(){
 
 /* ---------- démarrage ---------- */
 renderFilters(); renderGrid(); renderGauge(); initLoupe(); threadIntro(); bind();
-artReady.catch(()=>{console.error('Logo par défaut introuvable : vérifiez assets/logo-monogramme.png et ouvrez le site via un serveur (pas en file://).')});
 artReady.then(()=>{const h=location.hash; if(h.startsWith('#produit-'))openProduct(h.slice(9))});
 })();
